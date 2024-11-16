@@ -1,11 +1,11 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
     <option name="buildProfileId" value="dev" />
-    <option name="command" value="run --package template --bin template" />
+    <option name="command" value="run --package minecraft-accounts --bin minecraft-accounts" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs>
       <env name="CARGO_PROFILE_DEV_BUILD_OVERRIDE_DEBUG" value="true" />
-      <env name="DATABASE_URL" value="postgres://postgres:password@localhost/postgres" />
+      <env name="DATABASE_URL" value="postgres://postgres:password@localhost/minecraft_accounts" />
       <env name="NATS_URL" value="localhost:4222" />
     </envs>
     <option name="emulateTerminal" value="true" />
