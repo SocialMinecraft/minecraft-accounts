@@ -291,11 +291,15 @@ impl Store {
 
     pub async fn get(&self, user: Option<String>, discord: Option<String>) -> Result<Vec<MinecraftAccount>> {
         let mut re = Vec::new();
-        for account in self.get_by_user(&user.unwrap()).await? {
-            re.push(account);
+        if user.is_some() {
+            for account in self.get_by_user(&user.unwrap()).await? {
+                re.push(account);
+            }
         }
-        for account in self.get_by_discord(&discord.unwrap()).await? {
-            re.push(account);
+        if discord.is_some() {
+            for account in self.get_by_discord(&discord.unwrap()).await? {
+                re.push(account);
+            }
         }
         Ok(re)
     }
