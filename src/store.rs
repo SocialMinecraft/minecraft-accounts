@@ -1,5 +1,4 @@
 use anyhow::Result;
-use chrono::{DateTime, NaiveDate};
 use protobuf::SpecialFields;
 use sqlx::PgPool;
 use sqlx::postgres::PgQueryResult;
@@ -125,6 +124,25 @@ impl Store {
         Ok(re.rows_affected() == 1)
     }
 
+    pub async fn uuid_exists(&self, minecraft_uuid: &String) -> Result<bool> {
+        struct T2 {
+            minecraft_uuid: String,
+        }
+        let re : sqlx::Result<Option<T2>> = sqlx::query_as!(
+            T2,
+            r#"
+            SELECT minecraft_uuid FROM accounts WHERE minecraft_uuid = $1
+            ;"#,
+            minecraft_uuid
+        )
+            .fetch_optional(&self.db)
+            .await;
+
+        let re = re?;
+
+        Ok(re.is_some())
+    }
+
     pub async fn get_by_user(&self, id: &String) -> Result<Vec<MinecraftAccount>> {
 
         let re : sqlx::Result<Vec<T>> = sqlx::query_as!(
@@ -192,6 +210,17 @@ impl Store {
             special_fields: SpecialFields::default(),
         }).collect();
 
+        Ok(re)
+    }
+
+    pub async fn get(&self, user: Option<String>, discord: Option<String>) -> Result<Vec<MinecraftAccount>> {
+        let mut re = Vec::new();
+        for account in self.get_by_user(&user.unwrap()).await? {
+            re.push(account);
+        }
+        for account in self.get_by_discord(&discord.unwrap()).await? {
+            re.push(account);
+        }
         Ok(re)
     }
 
