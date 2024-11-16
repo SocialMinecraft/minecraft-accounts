@@ -10,7 +10,7 @@ pub struct Store {
 }
 
 struct T {
-    pub id: i64,
+    id: i64,
 
     discord_id: Option<String>,
     user_id: Option<String>,
@@ -124,14 +124,41 @@ impl Store {
         Ok(re.rows_affected() == 1)
     }
 
-    pub async fn uuid_exists(&self, minecraft_uuid: &String) -> Result<bool> {
+    pub async fn minecraft_name_to_uuid(&self, name: &String) -> Result<Option<String>> {
         struct T2 {
-            minecraft_uuid: String,
+            pub minecraft_uuid: String,
         }
         let re : sqlx::Result<Option<T2>> = sqlx::query_as!(
             T2,
             r#"
-            SELECT minecraft_uuid FROM accounts WHERE minecraft_uuid = $1
+            SELECT
+                minecraft_uuid
+            FROM
+                accounts
+            WHERE
+                minecraft_username = $1
+            ;"#,
+            name
+        )
+            .fetch_optional(&self.db)
+            .await;
+
+        let re = re?;
+        match re {
+            None => Ok(None),
+            Some(t) => Ok(Some(t.minecraft_uuid))
+        }
+    }
+
+    pub async fn uuid_owner(&self, minecraft_uuid: &String) -> Result<(Option<String>, Option<String>)> {
+        struct T2 {
+            pub discord_id: Option<String>,
+            pub user_id: Option<String>,
+        }
+        let re : sqlx::Result<Option<T2>> = sqlx::query_as!(
+            T2,
+            r#"
+            SELECT discord_id, user_id FROM accounts WHERE minecraft_uuid = $1
             ;"#,
             minecraft_uuid
         )
@@ -139,8 +166,12 @@ impl Store {
             .await;
 
         let re = re?;
+        if re.is_none() {
+            return Ok((None, None));
+        }
+        let re = re.unwrap();
 
-        Ok(re.is_some())
+        Ok((re.user_id, re.discord_id))
     }
 
     pub async fn get_by_user(&self, id: &String) -> Result<Vec<MinecraftAccount>> {
@@ -211,6 +242,51 @@ impl Store {
         }).collect();
 
         Ok(re)
+    }
+
+    pub async fn get_by_minecraft(&self, uuid: &String) -> Result<Option<MinecraftAccount>> {
+
+        let re : sqlx::Result<Option<T>> = sqlx::query_as!(
+            T,
+            r#"
+            SELECT
+                id,
+                discord_id, user_id,
+                minecraft_uuid, minecraft_username,
+                is_main,
+                first_name
+            FROM
+                accounts
+            WHERE
+                minecraft_uuid = $1
+            ;"#,
+            uuid
+        )
+            .fetch_optional(&self.db)
+            .await;
+
+        let re = re?;
+        match re {
+            None => Ok(None),
+            Some(t) => {
+                Ok(Some(
+                    MinecraftAccount{
+                        deprecated_first_name: t.first_name.unwrap_or("Deprecated".to_string()),
+
+                        minecraft_uuid: t.minecraft_uuid,
+                        minecraft_username: t.minecraft_username,
+                        is_main: t.is_main,
+
+                        special_fields: SpecialFields::default(),
+                    }
+                ))
+            }
+        }
+    }
+
+    pub async fn uuid_exists(&self, id: &String) -> Result<bool> {
+        let (user, discord) = self.uuid_owner(id).await?;
+        Ok(discord.is_some() || user.is_some())
     }
 
     pub async fn get(&self, user: Option<String>, discord: Option<String>) -> Result<Vec<MinecraftAccount>> {
