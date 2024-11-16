@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT minecraft_uuid FROM accounts WHERE minecraft_uuid = $1\n            ;",
+  "query": "\n            SELECT\n                minecraft_uuid\n            FROM\n                accounts\n            WHERE\n                minecraft_username = $1\n            ;",
   "describe": {
     "columns": [
       {
@@ -18,5 +18,5 @@
       false
     ]
   },
-  "hash": "c18334151fef014e376b00965f40c908b55a46c84f0307c22103e0d3e7c72743"
+  "hash": "313a442db14288c57da18690718575d0274226d2dd10acbb37b1f3dcce705521"
 }
