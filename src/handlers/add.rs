@@ -1,6 +1,7 @@
 use protobuf::{Message, MessageField};
 use async_nats::Client;
 use serde::Deserialize;
+use crate::handlers::util::send_change_error;
 use crate::proto::minecraft_account::MinecraftAccount;
 use crate::proto::minecraft_account_add::AddMinecraftAccountRequest;
 use crate::proto::minecraft_account_update::{ChangeMinecraftAccountResponse, MinecraftAccountChangeType, MinecraftAccountChanged};
@@ -27,25 +28,13 @@ pub async fn add(db: Store, nc: Client, msg: async_nats::Message) -> anyhow::Res
                 let response = response.json::<T>().await?;
                 request.minecraft_uuid = Some(response.id);
             } else if response.status() == reqwest::StatusCode::NOT_FOUND {
-                let mut resp = ChangeMinecraftAccountResponse::new();
-                resp.success = false;
-                resp.error_message = Some("Minecraft Account was not found".to_string());
-                let encoded: Vec<u8> = resp.write_to_bytes()?;
-                nc.publish(reply, encoded.into()).await?;
+                send_change_error(nc.clone(), reply, "Minecraft Account was not found").await?;
                 return Ok(());
             } else if response.status() == reqwest::StatusCode::TOO_MANY_REQUESTS {
-                let mut resp = ChangeMinecraftAccountResponse::new();
-                resp.success = false;
-                resp.error_message = Some("Minecraft Account Lookup is overload, please try again in a minute".to_string());
-                let encoded: Vec<u8> = resp.write_to_bytes()?;
-                nc.publish(reply, encoded.into()).await?;
+                send_change_error(nc.clone(), reply, "Minecraft Account Lookup is overload, please try again in a minute").await?;
                 return Ok(());
             } else {
-                let mut resp = ChangeMinecraftAccountResponse::new();
-                resp.success = false;
-                resp.error_message = Some("Unknown error when looking up username".to_string());
-                let encoded: Vec<u8> = resp.write_to_bytes()?;
-                nc.publish(reply, encoded.into()).await?;
+                send_change_error(nc.clone(), reply, "Unknown error when looking up username").await?;
                 return Ok(());
             }
         }
@@ -53,11 +42,7 @@ pub async fn add(db: Store, nc: Client, msg: async_nats::Message) -> anyhow::Res
 
         // Check that the minecraft name is not already in use
         if db.uuid_exists(&request.minecraft_uuid.clone().unwrap()).await? {
-            let mut resp = ChangeMinecraftAccountResponse::new();
-            resp.success = false;
-            resp.error_message = Some("Minecraft Account is already registered.".to_string());
-            let encoded: Vec<u8> = resp.write_to_bytes()?;
-            nc.publish(reply, encoded.into()).await?;
+            send_change_error(nc.clone(), reply, "Minecraft Account is already registered.").await?;
             return Ok(());
         }
 
@@ -88,12 +73,7 @@ pub async fn add(db: Store, nc: Client, msg: async_nats::Message) -> anyhow::Res
             Ok(account) => account,
             Err(e) => {
                 tracing::error!("Error creating account: {:?}", e);
-
-                let mut resp = ChangeMinecraftAccountResponse::new();
-                resp.success = false;
-                resp.error_message = Some("Internal Error creating account.".to_string());
-                let encoded: Vec<u8> = resp.write_to_bytes()?;
-                nc.publish(reply, encoded.into()).await?;
+                send_change_error(nc.clone(), reply, "Internal Error creating account.").await?;
                 return Ok(());
             }
         };
