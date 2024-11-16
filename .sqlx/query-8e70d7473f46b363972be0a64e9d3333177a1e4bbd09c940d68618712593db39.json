@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            DELETE FROM accounts\n            WHERE minecraft_uuid = $1\n            ;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8e70d7473f46b363972be0a64e9d3333177a1e4bbd09c940d68618712593db39"
+}

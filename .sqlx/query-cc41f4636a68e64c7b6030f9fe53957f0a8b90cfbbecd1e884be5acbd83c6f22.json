@@ -1,0 +1,63 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO accounts (\n                discord_id, user_id,\n                minecraft_uuid, minecraft_username,\n                is_main,\n                first_name\n            ) VALUES ($1, $2, $3, $4, $5, $6)\n            RETURNING\n                id,\n                discord_id, user_id,\n                minecraft_uuid, minecraft_username,\n                is_main,\n                first_name\n            ;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "discord_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "minecraft_uuid",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "minecraft_username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "is_main",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "first_name",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Bool",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "cc41f4636a68e64c7b6030f9fe53957f0a8b90cfbbecd1e884be5acbd83c6f22"
+}

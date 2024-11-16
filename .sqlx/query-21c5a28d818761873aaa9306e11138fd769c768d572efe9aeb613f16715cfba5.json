@@ -1,0 +1,60 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE\n                accounts\n            SET\n                minecraft_username = $2,\n                is_main = $3\n            WHERE\n                minecraft_uuid = $1\n            RETURNING\n                id,\n                discord_id, user_id,\n                minecraft_uuid, minecraft_username,\n                is_main,\n                first_name\n            ;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "discord_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "minecraft_uuid",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "minecraft_username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "is_main",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "first_name",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Varchar",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "21c5a28d818761873aaa9306e11138fd769c768d572efe9aeb613f16715cfba5"
+}
