@@ -92,7 +92,7 @@ pub async fn add(db: Store, nc: Client, msg: async_nats::Message) -> anyhow::Res
         broadcast.deprecated_discord_id = request.deprecated_discord_id;
         broadcast.change = MinecraftAccountChangeType::ADDED.into();
         broadcast.account = MessageField::some(account);
-        let encoded: Vec<u8> = resp.write_to_bytes()?;
+        let encoded: Vec<u8> = broadcast.write_to_bytes()?;
         nc.publish("accounts.minecraft.changed", encoded.into()).await?;
     }
 
