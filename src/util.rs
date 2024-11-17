@@ -41,7 +41,8 @@ where
         let nc = nc.clone();
         let f = f.clone();
 
-        task::spawn(tokio::time::timeout(Duration::from_millis(300), async move {
+        // Normally this is 300 ms, but bumping to 1000 due to the mojang account lookup
+        task::spawn(tokio::time::timeout(Duration::from_millis(1000), async move {
             let msg = msg;
             if let Err(e) = f(nc, msg.clone()).await {
                 error!("Error: {}", e.to_string());
