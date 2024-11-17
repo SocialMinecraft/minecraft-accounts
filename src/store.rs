@@ -2,6 +2,7 @@ use anyhow::Result;
 use protobuf::SpecialFields;
 use sqlx::PgPool;
 use sqlx::postgres::PgQueryResult;
+use sqlx::types::Uuid;
 use crate::proto::minecraft_account::MinecraftAccount;
 
 #[derive(Clone, Debug)]
@@ -15,7 +16,7 @@ struct T {
     discord_id: Option<String>,
     user_id: Option<String>,
 
-    minecraft_uuid: String,
+    minecraft_uuid: Uuid,
     minecraft_username: String,
 
     is_main: bool,
@@ -49,7 +50,7 @@ impl Store {
             ;"#,
             discord_id,
             user_id,
-            account.minecraft_uuid,
+            Uuid::parse_str(&account.minecraft_uuid)?,
             account.minecraft_username,
             account.is_main,
             account.deprecated_first_name,
@@ -61,7 +62,7 @@ impl Store {
         Ok(MinecraftAccount{
             deprecated_first_name: re.first_name.unwrap_or("Deprecated".to_string()),
 
-            minecraft_uuid: re.minecraft_uuid,
+            minecraft_uuid: re.minecraft_uuid.to_string(),
             minecraft_username: re.minecraft_username,
             is_main: re.is_main,
 
@@ -88,7 +89,7 @@ impl Store {
                 is_main,
                 first_name
             ;"#,
-            account.minecraft_uuid,
+            Uuid::parse_str(&account.minecraft_uuid)?,
             account.minecraft_username,
             account.is_main,
         )
@@ -99,7 +100,7 @@ impl Store {
         Ok(MinecraftAccount{
             deprecated_first_name: re.first_name.unwrap_or("Deprecated".to_string()),
 
-            minecraft_uuid: re.minecraft_uuid,
+            minecraft_uuid: re.minecraft_uuid.to_string(),
             minecraft_username: re.minecraft_username,
             is_main: re.is_main,
 
@@ -114,7 +115,7 @@ impl Store {
             DELETE FROM accounts
             WHERE minecraft_uuid = $1
             ;"#,
-            minecraft_uuid
+            Uuid::parse_str(&minecraft_uuid)?,
         )
             .execute(&self.db)
             .await;
@@ -160,7 +161,7 @@ impl Store {
             r#"
             SELECT discord_id, user_id FROM accounts WHERE minecraft_uuid = $1
             ;"#,
-            minecraft_uuid
+            Uuid::parse_str(&minecraft_uuid)?,
         )
             .fetch_optional(&self.db)
             .await;
@@ -199,7 +200,7 @@ impl Store {
         let re = re.into_iter().map(|t| MinecraftAccount{
             deprecated_first_name: t.first_name.unwrap_or("Deprecated".to_string()),
 
-            minecraft_uuid: t.minecraft_uuid,
+            minecraft_uuid: t.minecraft_uuid.to_string(),
             minecraft_username: t.minecraft_username,
             is_main: t.is_main,
 
@@ -234,7 +235,7 @@ impl Store {
         let re = re.into_iter().map(|t| MinecraftAccount{
             deprecated_first_name: t.first_name.unwrap_or("Deprecated".to_string()),
 
-            minecraft_uuid: t.minecraft_uuid,
+            minecraft_uuid: t.minecraft_uuid.to_string(),
             minecraft_username: t.minecraft_username,
             is_main: t.is_main,
 
@@ -260,7 +261,7 @@ impl Store {
             WHERE
                 minecraft_uuid = $1
             ;"#,
-            uuid
+            Uuid::parse_str(&uuid)?,
         )
             .fetch_optional(&self.db)
             .await;
@@ -273,7 +274,7 @@ impl Store {
                     MinecraftAccount{
                         deprecated_first_name: t.first_name.unwrap_or("Deprecated".to_string()),
 
-                        minecraft_uuid: t.minecraft_uuid,
+                        minecraft_uuid: t.minecraft_uuid.to_string(),
                         minecraft_username: t.minecraft_username,
                         is_main: t.is_main,
 

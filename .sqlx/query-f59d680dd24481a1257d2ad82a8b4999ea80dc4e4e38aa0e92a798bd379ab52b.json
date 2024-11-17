@@ -21,7 +21,7 @@
       {
         "ordinal": 3,
         "name": "minecraft_uuid",
-        "type_info": "Varchar"
+        "type_info": "Uuid"
       },
       {
         "ordinal": 4,
