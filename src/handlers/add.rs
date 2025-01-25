@@ -50,7 +50,7 @@ pub async fn add(db: Store, nc: Client, msg: async_nats::Message) -> anyhow::Res
         let mut account = MinecraftAccount::new();
         account.minecraft_username = request.minecraft_username.clone();
         account.minecraft_uuid = request.minecraft_uuid.clone().unwrap();
-        account.deprecated_first_name = request.minecraft_username.clone();
+        account.deprecated_first_name = request.first_name.clone();
 
         // Is their first account (and thus main account)
         {
