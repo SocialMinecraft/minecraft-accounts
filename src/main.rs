@@ -6,6 +6,7 @@ mod handlers;
 use anyhow::Result;
 use tokio::task::JoinSet;
 use crate::handlers::add::add;
+use crate::handlers::get::get;
 use crate::handlers::list::list;
 use crate::handlers::remove::remove;
 use crate::store::Store;
@@ -53,6 +54,14 @@ async fn main() -> Result<()> {
         util::handle_requests(_nc, "accounts.minecraft.list", move|_nc, msg| {
             list(_store.clone(), _nc, msg)
         }).await.expect("accounts.minecraft.list");
+    });
+
+    let _nc = nc.clone();
+    let _store = store.clone();
+    set.spawn(async move {
+        util::handle_requests(_nc, "accounts.minecraft.get", move|_nc, msg| {
+            get(_store.clone(), _nc, msg)
+        }).await.expect("accounts.minecraft.get");
     });
 
     set.join_all().await;
